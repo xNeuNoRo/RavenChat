@@ -6,4 +6,7 @@ declare module "@neunoro/fastify-kit" {
   export interface AlsStore {
     dbSession: IDocumentSession;
   }
+  export interface RequestContext {
+    dbSession: IDocumentSession;
+  }
 }
