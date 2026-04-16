@@ -1,8 +1,16 @@
-import { InjectConfig } from "@neunoro/fastify-kit";
+import {
+  Inject,
+  InjectConfig,
+  LOGGER_TOKEN,
+  LoggerContract,
+} from "@neunoro/fastify-kit";
 import DocumentStore, { IDocumentStore } from "ravendb";
 
 export class RavenDbService {
   private static _store: IDocumentStore;
+
+  @Inject(LOGGER_TOKEN)
+  private readonly logger!: LoggerContract;
 
   @InjectConfig("DATABASE_URL")
   private readonly dbUrl!: string;
@@ -33,7 +41,7 @@ export class RavenDbService {
     store.initialize();
     RavenDbService._store = store;
 
-    console.log(
+    this.logger.info(
       `RavenDB inicializado en ${this.dbUrl} con base de datos ${this.dbName}`,
     );
   }
@@ -42,7 +50,7 @@ export class RavenDbService {
     if (RavenDbService._store) {
       RavenDbService._store.dispose();
       RavenDbService._store = undefined as any;
-      console.log("Conexión a RavenDB cerrada correctamente.");
+      this.logger.info("Conexión a RavenDB cerrada correctamente.");
     }
   }
 }
