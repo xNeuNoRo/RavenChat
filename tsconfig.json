@@ -22,16 +22,17 @@
     "rootDir": "src",
     "resolveJsonModule": true,
     // Para los decoradores de los modelos, [SEQUELIZE u otro ORM con decoradores]
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
+    "experimentalDecorators": false,
+    "emitDecoratorMetadata": false,
     // Para usar JSX/TSX en caso de usar react-email
     "jsx": "react-jsx",
     // Para simplificar los imports utilizando @ en vez de todos los "../../" de las rutas
     "baseUrl": ".",
+    "ignoreDeprecations": "6.0", // Ignorar deprecacion de baseUrl en esta version xd
     "paths": {
       "@/*": ["./src/*"]
     }
   },
   "include": ["src/**/*.ts", "src/emails/**/*.tsx"], // En caso de usar react-email incluir la carpeta /emails
-  "exclude": ["node_modules", "dist", "src/**/*.test.ts"] // Excluir los tests y node_modules de la compilacion
+  "exclude": ["node_modules", "dist", "src/**/*.test.ts", "packages/**/*"] // Excluir los tests y node_modules de la compilacion
 }
