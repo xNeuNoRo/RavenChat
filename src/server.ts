@@ -12,6 +12,7 @@ import { RavenDbService } from "./infrastructure/database/RavenDbService";
 import { buildApp } from "./app";
 import { loadAppConfigurations } from "./config/app.config";
 import { FastifyInstance } from "fastify";
+import { ravenSessionPlugin } from "./infrastructure/database/ravenSessionPlugin";
 
 @Injectable()
 class ApplicationServer {
@@ -34,6 +35,9 @@ class ApplicationServer {
 
       // Construimos la app Fastify
       const app = await buildApp();
+
+      // Registramos el plugin para manejar sesiones de RavenDB en cada solicitud
+      await app.register(ravenSessionPlugin);
 
       // Usamos las variables inyectadas
       await app.listen({ port: this.port, host: this.host });
