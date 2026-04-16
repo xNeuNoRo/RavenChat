@@ -1,8 +1,15 @@
-import { requestContext } from "@neunoro/fastify-kit";
+import {
+  Cache,
+  Injectable,
+  requestContext,
+  Retry,
+  Timeout,
+} from "@neunoro/fastify-kit";
 import type { IDocumentSession } from "ravendb";
 import { ChatMessage } from "../../domain/entities/ChatMessage.entity";
 import { UserActivityStats } from "../../domain/projections/UserActivityStats";
 
+@Injectable()
 export class ChatRepository {
   /**
    * @description funcion de utilidad para obtener la sesion de ravendb de la request
@@ -26,6 +33,9 @@ export class ChatRepository {
    * @param id Id del mensaje a obtener
    * @returns El mensaje de chat encontrado o null si no existe
    */
+  @Timeout(30000) // timeout de 30 segundos para esta consulta para evitar que se quede colgada por muchas peticiones simultaneas
+  @Retry(3, 500) // reintenta la consulta hasta 3 veces con un delay de 500ms entre cada intento en caso de error
+  @Cache("chat:message")
   public async getById(id: string): Promise<ChatMessage | null> {
     return await this.session.load<ChatMessage>(id);
   }
@@ -35,6 +45,9 @@ export class ChatRepository {
    * @param limit Cantidad maxima de mensajes a obtener (default: 50)
    * @returns Un array de mensajes de chat recientes, ordenados por fecha de creacion descendente
    */
+  @Timeout(30000) // timeout de 30 segundos para esta consulta para evitar que se quede colgada por muchas peticiones simultaneas
+  @Retry(3, 500) // reintenta la consulta hasta 3 veces con un delay de 500ms entre cada intento en caso de error
+  @Cache("chat:recents")
   public async getRecent(limit: number = 50): Promise<ChatMessage[]> {
     const messages = await this.session
       .query<ChatMessage>("ChatMessages")
@@ -59,6 +72,8 @@ export class ChatRepository {
    * @description obtiene las estadisticas de actividad de los usuarios, ordenados por cantidad de mensajes descendente
    * @returns Un array de objetos UserActivityStats con las estadisticas de actividad de los usuarios, ordenados por cantidad de mensajes descendente.
    */
+  // Cacheamos el resultado solo por 10 segundos
+  @Cache("active:users:stats", 10)
   public async getActiveUsersStats(): Promise<UserActivityStats[]> {
     return await this.session
       .query<UserActivityStats>({ indexName: "Messages/ByUserStats" })
