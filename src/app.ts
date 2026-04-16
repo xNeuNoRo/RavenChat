@@ -1,12 +1,14 @@
 import fs from "node:fs";
 import { FastifyKit } from "@neunoro/fastify-kit";
 import { AppModule } from "./app.module";
+import { envSchema } from "./config/env.schema";
 
 export async function buildApp() {
   // Creamos la aplicación usando la Factory del framework
   const app = await FastifyKit.create({
     // Módulo raíz de la aplicación
     module: AppModule,
+    envSchema: envSchema,
 
     // Habilitamos soporte para WebSockets
     websockets: true,
