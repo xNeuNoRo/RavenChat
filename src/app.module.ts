@@ -1,5 +1,5 @@
 import path from "node:path";
-import { Module, TRANSACTION_MANAGER_TOKEN } from "@neunoro/fastify-kit";
+import { Module } from "@neunoro/fastify-kit";
 import { RavenDbService } from "./infrastructure/database/RavenDbService";
 
 @Module({
