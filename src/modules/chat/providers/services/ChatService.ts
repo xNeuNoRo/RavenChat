@@ -22,6 +22,14 @@ export class ChatService {
     return requestContext.get("dbSession");
   }
 
+  public async getMessageById(id: string): Promise<ChatMessage> {
+    const message = await this.chatRepository.getById(id);
+    if (!message) {
+      throw new NotFoundException("mensaje", id);
+    }
+    return message;
+  }
+
   @ClearCache("chat") // Limpiamos el cache de chat cada vez que se envia un nuevo mensaje
   public async sendMessage(dto: CreateMessageDto): Promise<ChatMessage> {
     const message = ChatMessage.create(dto.username, dto.content);
@@ -38,7 +46,7 @@ export class ChatService {
   ): Promise<ChatMessage> {
     const message = await this.chatRepository.getById(id);
 
-    if (!message) throw new NotFoundException(`Mensaje ${id} no encontrado`);
+    if (!message) throw new NotFoundException("mensaje", id);
     if (message.username !== currentUsername)
       throw new ForbiddenException("No puedes editar este mensaje");
 
@@ -54,7 +62,7 @@ export class ChatService {
   ): Promise<void> {
     const message = await this.chatRepository.getById(id);
     if (!message) {
-      throw new NotFoundException(`El mensaje con ID ${id} no existe.`);
+      throw new NotFoundException("mensaje", id);
     }
 
     if (message.username !== currentUsername) {
