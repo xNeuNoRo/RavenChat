@@ -15,11 +15,14 @@ export type ChatMessages = Static<typeof ChatMessagesSchema>;
 
 // --- Esquemas de Estadísticas de Usuario ---
 
-export const UserActivityStatsSchema = Type.Object({
-  username: Type.String(),
-  totalMessages: Type.Number(),
-  lastMessageAt: Type.String({ format: "date-time" }),
-});
+export const UserActivityStatsSchema = Type.Object(
+  {
+    username: Type.String(),
+    totalMessages: Type.Number(),
+    lastMessageAt: Type.String({ format: "date-time" }),
+  },
+  { additionalProperties: true }, // Permitimos propiedades adicionales por los metadatos de ravenDB
+);
 export const UserActivityStatsArraySchema = Type.Array(UserActivityStatsSchema);
 
 export type UserActivityStats = Static<typeof UserActivityStatsSchema>;
