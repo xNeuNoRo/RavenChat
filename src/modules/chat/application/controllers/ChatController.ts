@@ -58,6 +58,7 @@ export class ChatController {
   @Post("/", {
     body: CreateMessageSchema,
   })
+  @UseParams(Body())
   public async sendMessage(dto: CreateMessageDto): Promise<ChatMessage> {
     return await this._chatService.sendMessage(dto);
   }
