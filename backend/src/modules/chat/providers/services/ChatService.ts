@@ -1,6 +1,5 @@
 import {
   ClearCache,
-  EVENT_BUS_TOKEN,
   EventBusContract,
   ForbiddenException,
   getEventBus,
