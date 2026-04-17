@@ -19,6 +19,9 @@ export const queryKeys = {
       byUser: (username: string) =>
         ["chat", "stats", "user", { username }] as const,
     },
+
+    // Llave para el estado de quién está escribiendo en cada sala (efímero, no viene de la API)
+    typing: (room: string) => ["chat", "typing", { room }] as const,
   },
 
   user: {
