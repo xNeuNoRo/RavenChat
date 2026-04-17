@@ -10,7 +10,8 @@ export const useChatParams = () => {
 
   // Valores actuales extraídos de la URL con valores por defecto
   const username = searchParams.get("username") || "";
-  const room = searchParams.get("room") || CHAT_ROOMS.GENERAL;
+  // const room = searchParams.get("room") || CHAT_ROOMS.GENERAL;
+  const room = CHAT_ROOMS.GENERAL; // Por ahora forzamos a GENERAL, pero se puede habilitar la selección de sala fácilmente
 
   /**
    * @description Actualiza los parámetros de búsqueda de forma atómica.
