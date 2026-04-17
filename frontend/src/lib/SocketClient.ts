@@ -19,6 +19,7 @@ export class SocketClient {
   >();
   private reconnectTimer: number | null = null;
   private readonly url: string;
+  private intentionalDisconnect = false;
 
   constructor(url: string) {
     this.url = url;
@@ -56,6 +57,9 @@ export class SocketClient {
     // Si ya estamos conectados, no hacemos nada
     if (this.socket?.readyState === WebSocket.OPEN) return;
 
+    // Si había un timer de reconexión pendiente, lo limpiamos para evitar reconectar mientras ya estamos intentando conectar
+    this.intentionalDisconnect = false;
+
     // Configuración básica del WebSocket nativo
     this.socket = new WebSocket(this.url);
 
@@ -82,10 +86,12 @@ export class SocketClient {
     this.socket.onclose = () => {
       // Notificamos a los listeners que estamos desconectados
       this.notifyConnectionListeners();
-      console.warn(
-        "WebSocket desconectado, intentando reconectar en 3 segundos...",
-      );
-      this.reconnectTimer = globalThis.setTimeout(() => this.connect(), 3000);
+      if (!this.intentionalDisconnect) {
+        console.warn(
+          "WebSocket desconectado, intentando reconectar en 3 segundos...",
+        );
+        this.reconnectTimer = globalThis.setTimeout(() => this.connect(), 3000);
+      }
     };
   }
 
@@ -145,7 +151,11 @@ export class SocketClient {
    * @description Cierra la conexión WebSocket y limpia todos los handlers registrados.
    */
   public disconnect() {
-    if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
+    this.intentionalDisconnect = true;
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
     this.socket?.close();
     this.handlers.clear();
   }
