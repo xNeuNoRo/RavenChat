@@ -84,7 +84,7 @@ export const chatEventStrategies = {
   },
 
   [ChatOutboundEvent.ERROR]: (
-    _queryClient: QueryClient,
+    queryClient: QueryClient,
     _room: string,
     data: ChatOutboundPayloads[typeof ChatOutboundEvent.ERROR],
   ) => {
@@ -92,5 +92,6 @@ export const chatEventStrategies = {
     toast.error(`Ha ocurrido un error en el servidor`, {
       duration: 5000,
     });
+    queryClient.invalidateQueries({ queryKey: queryKeys.chat.all });
   },
 };
