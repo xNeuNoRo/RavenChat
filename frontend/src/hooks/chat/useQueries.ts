@@ -55,6 +55,7 @@ export function useChatMessage(id?: string) {
 export function useChatTyping(room: string) {
   const { data } = useQuery({
     queryKey: queryKeys.chat.typing(room),
+    queryFn: () => [] as string[], // Siempre debe llevar un queryFn aunque sea vacio xd
     staleTime: Infinity, // Nunca caduca, el socket decide cuándo limpiarlo
   });
 
