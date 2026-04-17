@@ -34,12 +34,17 @@ export class ChatGateway {
 
   @OnConnect()
   public handleConnection(client: FastifyKitSocket) {
-    this.logger.info(`[🟢 ChatGateway] Cliente conectado: ${client.id}`);
+    this.logger.info(`[ChatGateway] Cliente conectado: ${client.id}`);
+    // Unimos el cliente a una sala general para poder emitir eventos a todos los clientes conectados a esa sala
+    client.join("general");
+    this.logger.info(
+      `[ChatGateway] Cliente ${client.id} se unió a la sala: general`,
+    );
   }
 
   @OnDisconnect()
   public handleDisconnect(client: FastifyKitSocket) {
-    this.logger.info(`[🔴 ChatGateway] Cliente desconectado: ${client.id}`);
+    this.logger.info(`[ChatGateway] Cliente desconectado: ${client.id}`);
   }
 
   /**
