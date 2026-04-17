@@ -8,6 +8,7 @@ export enum ChatInboundEvent {
   SEND_MESSAGE = "chat:message:send",
   UPDATE_MESSAGE = "chat:message:update",
   DELETE_MESSAGE = "chat:message:delete",
+  TYPING = "chat:typing",
 }
 
 // Eventos que el servidor emite a los clientes
@@ -15,6 +16,7 @@ export enum ChatOutboundEvent {
   MESSAGE_CREATED = "chat:message:created",
   MESSAGE_UPDATED = "chat:message:updated",
   MESSAGE_DELETED = "chat:message:deleted",
+  USER_TYPING_BROADCAST = "chat:typing:status",
   ERROR = "chat:error",
 }
 
@@ -30,6 +32,7 @@ export interface ChatInboundPayloads {
     params: MessageParamsDto;
     currentUsername: string;
   };
+  [ChatInboundEvent.TYPING]: { username: string; isTyping: boolean };
 }
 
 // Lo que el cliente VA A recibir
@@ -38,6 +41,10 @@ export interface ChatOutboundPayloads {
   [ChatOutboundEvent.MESSAGE_UPDATED]: ChatMessage;
   [ChatOutboundEvent.MESSAGE_DELETED]: { id: string };
   [ChatOutboundEvent.ERROR]: { message: string; code: string };
+  [ChatOutboundEvent.USER_TYPING_BROADCAST]: {
+    username: string;
+    isTyping: boolean;
+  };
 }
 
 // Realmente no deberia ir aqui,

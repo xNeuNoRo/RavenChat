@@ -165,4 +165,22 @@ export class ChatGateway {
       return { status: "ok", data: { id: payload.params.id } };
     });
   }
+
+  @SubscribeMessage(ChatInboundEvent.TYPING)
+  public async onTyping(
+    _client: FastifyKitSocket,
+    payload: ChatInboundPayloads[ChatInboundEvent.TYPING],
+  ): Promise<WsResponse> {
+    this._broadcaster.emitToRoom(
+      "/chat",
+      "general",
+      ChatOutboundEvent.USER_TYPING_BROADCAST,
+      {
+        username: payload.username,
+        isTyping: payload.isTyping,
+      },
+    );
+
+    return { status: "ok" };
+  }
 }
