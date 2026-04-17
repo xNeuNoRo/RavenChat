@@ -59,6 +59,9 @@ export function ChatInput({ room, username }: Readonly<ChatInputProps>) {
         type="text"
         value={content}
         onChange={handleTyping}
+        onBlur={() => {
+          window.scrollTo(0, 0);
+        }}
         placeholder="Escribe un mensaje..."
         className="flex-1 bg-neutral-950 text-neutral-100 placeholder-neutral-500 rounded-full px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all border border-neutral-800"
         autoComplete="off"

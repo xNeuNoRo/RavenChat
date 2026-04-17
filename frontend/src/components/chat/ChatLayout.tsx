@@ -49,7 +49,7 @@ export function ChatLayout({ room, username }: Readonly<ChatLayoutProps>) {
   }
 
   return (
-    <div className="flex flex-col h-dvh bg-neutral-950 overflow-hidden">
+    <div className="absolute inset-0 flex flex-col bg-neutral-950 overflow-hidden">
       {/* Header */}
       <ChatHeader
         room={room}
