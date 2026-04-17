@@ -1,9 +1,9 @@
 import { useEffect } from "react";
-import { chatSocket } from "../api/SocketClient";
+import { chatSocket } from "../../api/SocketClient";
 import {
   ChatOutboundEvent,
   type ChatOutboundPayloads,
-} from "../shared/chat.events";
+} from "../../shared/chat.events";
 
 /**
  * @description Hook funcional para suscribirse a un evento del socket.

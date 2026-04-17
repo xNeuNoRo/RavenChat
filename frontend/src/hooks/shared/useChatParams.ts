@@ -1,5 +1,5 @@
 import { useSearchParams } from "react-router-dom";
-import { CHAT_ROOMS } from "../shared/chat.rooms";
+import { CHAT_ROOMS } from "../../shared/chat.rooms";
 
 /**
  * @description Hook especializado para gestionar el estado estructural del chat (username y room)
