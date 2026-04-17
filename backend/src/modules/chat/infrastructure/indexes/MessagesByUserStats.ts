@@ -1,6 +1,10 @@
 import { AbstractCsharpIndexCreationTask } from "ravendb";
 
 export class MessagesByUserStats extends AbstractCsharpIndexCreationTask {
+  getIndexName(): string {
+    return "Messages/ByUserStats";
+  }
+
   constructor() {
     super();
 
