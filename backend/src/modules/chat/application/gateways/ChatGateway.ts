@@ -1,5 +1,7 @@
 import {
+  EventBusContract,
   FastifyKitSocket,
+  getEventBus,
   HttpException,
   Inject,
   LOGGER_TOKEN,
@@ -37,6 +39,11 @@ export class ChatGateway {
   @Inject(WsBroadcaster)
   private readonly _broadcaster!: WsBroadcaster;
 
+  // Utilizamos un getter para obtener la instancia del EventBus, asi emitir el evento a los handlers
+  private get _eventBus(): EventBusContract {
+    return getEventBus();
+  }
+
   @OnConnect()
   @UseParams(Socket())
   public handleConnection(client: FastifyKitSocket) {
@@ -55,7 +62,7 @@ export class ChatGateway {
   }
 
   // ========================================================
-  // Escuchamos a cualquier evento de mensaje creado, 
+  // Escuchamos a cualquier evento de mensaje creado,
   // actualizado o eliminado para emitirlo a los clientes conectados a la sala general
   // ========================================================
 
@@ -152,12 +159,8 @@ export class ChatGateway {
     return this.withDbSession(client, async () => {
       const savedMessage = await this._chatService.sendMessage(payload);
 
-      this._broadcaster.emitToRoom(
-        "/chat",
-        CHAT_ROOMS.GENERAL,
-        ChatOutboundEvent.MESSAGE_CREATED,
-        savedMessage,
-      );
+      // Emitimos el evento de mensaje creado a todos los clientes conectados a la sala general
+      this._eventBus.emit(ChatOutboundEvent.MESSAGE_CREATED, savedMessage);
 
       return { status: "ok", data: savedMessage };
     });
@@ -179,12 +182,8 @@ export class ChatGateway {
         payload.currentUsername,
       );
 
-      this._broadcaster.emitToRoom(
-        "/chat",
-        CHAT_ROOMS.GENERAL,
-        ChatOutboundEvent.MESSAGE_UPDATED,
-        updatedMessage,
-      );
+      // Emitimos el evento de mensaje actualizado a todos los clientes conectados a la sala general
+      this._eventBus.emit(ChatOutboundEvent.MESSAGE_UPDATED, updatedMessage);
 
       return { status: "ok", data: updatedMessage };
     });
@@ -205,12 +204,10 @@ export class ChatGateway {
         payload.currentUsername,
       );
 
-      this._broadcaster.emitToRoom(
-        "/chat",
-        CHAT_ROOMS.GENERAL,
-        ChatOutboundEvent.MESSAGE_DELETED,
-        { id: payload.params.id },
-      );
+      // Emitimos el evento de mensaje eliminado a todos los clientes conectados a la sala general
+      this._eventBus.emit(ChatOutboundEvent.MESSAGE_DELETED, {
+        id: payload.params.id,
+      });
 
       return { status: "ok", data: { id: payload.params.id } };
     });
