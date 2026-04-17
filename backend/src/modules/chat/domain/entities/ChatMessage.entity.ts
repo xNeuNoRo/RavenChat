@@ -7,16 +7,24 @@ export class ChatMessage {
 
   // Constructor público para permitir la hidratación de RavenDB
   public constructor(data?: Partial<ChatMessage>) {
-    const username = data?.username?.trim() || "Usuario Anónimo";
-    const content = data?.content?.trim() ?? "";
+    // Si no hay data (instanciación de prueba de RavenDB), inicializamos vacío y salimos
+    if (!data) {
+      this.username = "Usuario Anónimo";
+      this.content = "";
+      this.createdAt = new Date().toISOString();
+      return;
+    }
 
-    // Validamos los datos
+    const username = data.username?.trim() || "Usuario Anónimo";
+    const content = data.content?.trim() ?? "";
+
+    // Solo validamos si estamos "creando" o si los datos vienen de la DB
     this.validate(username, content);
 
-    this.id = data?.id;
+    this.id = data.id;
     this.username = username;
     this.content = content;
-    this.createdAt = data?.createdAt || new Date().toISOString();
+    this.createdAt = data.createdAt || new Date().toISOString();
   }
 
   // Método de validación compartido
