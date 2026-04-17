@@ -44,3 +44,19 @@ export function useChatMessage(id?: string) {
     staleTime: 1000 * 60 * 5, // 5 minutos de caché
   });
 }
+
+/**
+ * @description Hook para leer la lista de usuarios que están escribiendo en una sala.
+ * Es un estado puramente local alimentado por el WebSocket.
+ * @param room La sala de chat actual para saber qué caché leer.
+ * @returns Un array de strings con los nombres de usuario que están escribiendo actualmente en la sala.
+ * Si no hay nadie escribiendo, devuelve un array vacío.
+ */
+export function useChatTyping(room: string) {
+  const { data } = useQuery({
+    queryKey: queryKeys.chat.typing(room),
+    staleTime: Infinity, // Nunca caduca, el socket decide cuándo limpiarlo
+  });
+
+  return data || [];
+}
