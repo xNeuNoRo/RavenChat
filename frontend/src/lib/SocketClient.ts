@@ -14,11 +14,30 @@ export class SocketClient {
     ChatOutboundEvent,
     Array<(data: unknown) => void>
   >();
+  private readonly connectionListeners = new Set<(isConnected: boolean) => void>();
   private reconnectTimer: number | null = null;
   private readonly url: string;
 
   constructor(url: string) {
     this.url = url;
+  }
+
+  /**
+   * @description Permite suscribirse a cambios en el estado de la conexión WebSocket (conectado/desconectado).
+   */
+  public onConnectionChange(callback: (isConnected: boolean) => void) {
+    this.connectionListeners.add(callback);
+    // Notificamos el estado actual inmediatamente al suscribirse
+    callback(this.socket?.readyState === WebSocket.OPEN);
+    return () => this.connectionListeners.delete(callback);
+  }
+
+  /**
+   * @description Notifica a todos los listeners registrados sobre un cambio en el estado de la conexión (conectado/desconectado).
+   */
+  private notifyConnectionListeners() {
+    const isConnected = this.socket?.readyState === WebSocket.OPEN;
+    this.connectionListeners.forEach((cb) => cb(isConnected));
   }
 
   /**
@@ -30,6 +49,11 @@ export class SocketClient {
 
     // Configuración básica del WebSocket nativo
     this.socket = new WebSocket(this.url);
+
+    // Al iniciar la conexión, notificamos a los listeners que estamos conectados
+    this.socket.onopen = () => {
+      this.notifyConnectionListeners();
+    };
 
     // Handler para mensajes entrantes
     this.socket.onmessage = (msg) => {
@@ -47,6 +71,8 @@ export class SocketClient {
 
     // Handler para reconexión automática
     this.socket.onclose = () => {
+      // Notificamos a los listeners que estamos desconectados
+      this.notifyConnectionListeners();
       console.warn(
         "WebSocket desconectado, intentando reconectar en 3 segundos...",
       );

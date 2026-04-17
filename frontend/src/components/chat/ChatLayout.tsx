@@ -7,6 +7,7 @@ import { ChatInput } from "./ChatInput";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import ChatHeader from "./ChatHeader";
+import { ConnectionBanner } from "./ConnectionBanner";
 
 interface ChatLayoutProps {
   room: string;
@@ -46,6 +47,9 @@ export function ChatLayout({ room, username }: Readonly<ChatLayoutProps>) {
     <div className="flex flex-col h-full bg-neutral-950 overflow-hidden">
       {/* Header */}
       <ChatHeader room={room} username={username} />
+
+      {/* Banner de conexión */}
+      <ConnectionBanner />
 
       {/* Área de Mensajes */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 scroll-smooth">
