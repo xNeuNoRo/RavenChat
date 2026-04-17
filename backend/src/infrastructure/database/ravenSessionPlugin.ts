@@ -21,6 +21,8 @@ export const ravenSessionPlugin = fp(async (fastify: FastifyInstance) => {
       getLogger().error(
         "Error al obtener el store de AlsStore para inyectar la sesión de RavenDB.",
       );
+      session.dispose();
+      throw new Error("Contexto de request no inicializado");
     }
   });
 
