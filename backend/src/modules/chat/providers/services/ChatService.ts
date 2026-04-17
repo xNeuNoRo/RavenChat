@@ -51,6 +51,7 @@ export class ChatService {
       throw new ForbiddenException("No puedes editar este mensaje");
 
     message.updateContent(dto.content);
+    await this.chatRepository.save(message);
     await this.session.saveChanges();
     return message;
   }
