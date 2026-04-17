@@ -18,11 +18,11 @@ export class RavenDbService {
   @Inject(LOGGER_TOKEN)
   private readonly logger!: LoggerContract;
 
-  @InjectConfig("DATABASE_URL")
-  private readonly dbUrl: string = "http://localhost:8080";
+  @InjectConfig("database_url")
+  private readonly dbUrl!: string;
 
-  @InjectConfig("DATABASE_NAME")
-  private readonly dbName: string = "RavenChat";
+  @InjectConfig("database_name")
+  private readonly dbName!: string;
 
   private async ensureDatabaseExists(
     store: IDocumentStore,
@@ -50,7 +50,11 @@ export class RavenDbService {
         },
       );
 
-      if (!exists) {
+      if (exists) {
+        this.logger.info(
+          `[RavenDB] La base de datos '${databaseName}' ya existe.`,
+        );
+      } else {
         this.logger.info(
           `[RavenDB] La base de datos '${databaseName}' no existe. Creándola...`,
         );
@@ -66,10 +70,71 @@ export class RavenDbService {
         );
       }
     } catch (error: any) {
+      // Si el error es por falta de permisos, no detenemos la app
+      if (
+        error.name === "AuthorizationException" ||
+        process.env.RAVEN_CERT_BASE64
+      ) {
+        this.logger.warn(
+          `[RavenDB] Sin permisos para verificar/crear la BD automáticamente. Asumiendo que '${databaseName}' existe en el servidor Cloud.`,
+        );
+        return;
+      }
+
       this.logger.error("[RavenDB] Error verificando la base de datos:", error);
 
       throw error;
     }
+  }
+
+  /**
+   * @description Parchea globalThis.fetch para inyectar la configuración de mTLS nativo de Bun en 
+   * las peticiones que van a RavenDB, esto es necesario para poder conectar con RavenDB Cloud 
+   * usando certificados mTLS sin tener que usar librerías externas como https-proxy-agent que no son compatibles con Bun.
+   * @param crtBase64 El certificado mTLS en formato base64, obtenido de RavenDB Cloud.
+   * @param keyBase64 La clave privada del certificado mTLS en formato base64, obtenida de RavenDB Cloud.
+   */
+  private interceptRavenDbRequests(crtBase64: string, keyBase64: string) {
+    this.logger.info(
+      "[Bun-Fix] Parcheando globalThis.fetch para inyectar mTLS nativo...",
+    );
+
+    // Convertimos los certificados de base64 a buffers, que es el formato que espera la API de Bun para TLS
+    const crtBuffer = Buffer.from(crtBase64, "base64");
+    const keyBuffer = Buffer.from(keyBase64, "base64");
+
+    // Guardamos el fetch original de Bun
+    const originalFetch = globalThis.fetch;
+
+    // Sobrescribimos el fetch global del servidor
+    globalThis.fetch = async (
+      url: RequestInfo | URL,
+      options?: RequestInit,
+    ) => {
+      let targetUrl: string;
+
+      if (typeof url === "string") {
+        targetUrl = url;
+      } else if (url instanceof URL) {
+        targetUrl = url.toString();
+      } else {
+        targetUrl = url.url;
+      }
+
+      // Si la petición va a RavenDB, le inyectamos la seguridad de Bun
+      if (targetUrl.includes("ravendb.cloud")) {
+        options = options || {};
+        // Usamos la API exclusiva de Bun (tls: { cert, key })
+        (options as any).tls = {
+          cert: crtBuffer,
+          key: keyBuffer,
+          rejectUnauthorized: true,
+        };
+      }
+
+      // Dejamos que la petición continúe
+      return originalFetch(url, options);
+    };
   }
 
   public static get store(): IDocumentStore {
@@ -83,6 +148,15 @@ export class RavenDbService {
 
   public async initialize(): Promise<void> {
     if (RavenDbService._store) return;
+
+    // Leemos las variables de entorno para el certificado mTLS (si existen)
+    const crtBase64 = process.env.RAVEN_CERT_CRT_BASE64;
+    const keyBase64 = process.env.RAVEN_CERT_KEY_BASE64;
+
+    // Si tenemos las variables de entorno para el certificado
+    if (crtBase64 && keyBase64) {
+      this.interceptRavenDbRequests(crtBase64, keyBase64);
+    }
 
     const store = new DocumentStore(this.dbUrl, this.dbName);
 

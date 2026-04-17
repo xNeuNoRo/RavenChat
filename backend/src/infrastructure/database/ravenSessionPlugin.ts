@@ -10,6 +10,12 @@ export const ravenSessionPlugin = fp(async (fastify: FastifyInstance) => {
     // abrimos la sesion
     const session = RavenDbService.store.openSession();
 
+    // Le decimos a Node que si alguien intenta hacer console.log 
+    // o JSON.stringify de esta sesión, solo devuelva este texto:
+    (session as any).toJSON = () => "[RavenDB Active Session]";
+    // Para consolas de Node nativas (console.log):
+    (session as any)[Symbol.for('nodejs.util.inspect.custom')] = () => "[RavenDB Active Session]";
+
     // obtenemos nuestra store de la request (individual) del framework (fastify-kit)
     const store = requestContext.getStore();
 

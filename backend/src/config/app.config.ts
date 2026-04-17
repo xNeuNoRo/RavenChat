@@ -10,4 +10,6 @@ export const loadAppConfigurations = (): void => {
 
   // En el futuro, con mas configs idk
   // ConfigRegistry.set("jwt_secret", process.env.JWT_SECRET);
+  ConfigRegistry.set("database_url", process.env.DATABASE_URL);
+  ConfigRegistry.set("database_name", process.env.DATABASE_NAME);
 };
