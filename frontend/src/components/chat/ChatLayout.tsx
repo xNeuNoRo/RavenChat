@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useChatMessages, useChatTyping } from "@/hooks/chat";
 import { useChatSocketDispatcher } from "@/hooks/shared/useChatSocketDispatcher";
 import { useChatScroll } from "@/hooks/shared/useChatScroll";
@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import ChatHeader from "./ChatHeader";
 import { ConnectionBanner } from "./ConnectionBanner";
+import { StatsSidebar } from "./StatsSidebar";
 
 interface ChatLayoutProps {
   room: string;
@@ -15,6 +16,8 @@ interface ChatLayoutProps {
 }
 
 export function ChatLayout({ room, username }: Readonly<ChatLayoutProps>) {
+  const [showStats, setShowStats] = useState(false);
+
   // Activamos el listener global del WebSocket para esta sala
   useChatSocketDispatcher(room);
 
@@ -46,7 +49,11 @@ export function ChatLayout({ room, username }: Readonly<ChatLayoutProps>) {
   return (
     <div className="flex flex-col h-full bg-neutral-950 overflow-hidden">
       {/* Header */}
-      <ChatHeader room={room} username={username} />
+      <ChatHeader
+        room={room}
+        username={username}
+        onOpenStats={() => setShowStats(true)}
+      />
 
       {/* Banner de conexión */}
       <ConnectionBanner />
@@ -83,6 +90,21 @@ export function ChatLayout({ room, username }: Readonly<ChatLayoutProps>) {
       <div className="shrink-0 max-w-3xl w-full mx-auto">
         <ChatInput room={room} username={username} />
       </div>
+
+      <AnimatePresence>
+        {showStats && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowStats(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+            />
+            <StatsSidebar onClose={() => setShowStats(false)} />
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

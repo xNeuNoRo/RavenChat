@@ -1,15 +1,17 @@
-import { LogOut } from "lucide-react";
+import { LogOut, BarChart3 } from "lucide-react";
 import { useChatParams } from "@/hooks/shared/useChatParams";
 import { chatSocket } from "@/lib/SocketClient";
 
 interface ChatHeaderProps {
   room: string;
   username: string;
+  onOpenStats: () => void;
 }
 
 export default function ChatHeader({
   room,
   username,
+  onOpenStats,
 }: Readonly<ChatHeaderProps>) {
   const { clearChatParams } = useChatParams();
 
@@ -26,14 +28,24 @@ export default function ChatHeader({
         <p className="text-xs text-indigo-400">Conectado como @{username}</p>
       </div>
 
-      <button
-        onClick={handleLogout}
-        className="p-2 text-neutral-400 hover:text-red-400 hover:bg-neutral-800 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium cursor-pointer"
-        title="Salir de la sala"
-      >
-        <span className="hidden sm:inline">Salir</span>
-        <LogOut className="w-4 h-4" />
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={onOpenStats}
+          className="p-2 text-neutral-400 hover:text-indigo-400 hover:bg-neutral-800 rounded-lg transition-colors"
+          title="Ver Estadísticas"
+        >
+          <BarChart3 className="w-5 h-5" />
+        </button>
+
+        <button
+          onClick={handleLogout}
+          className="p-2 text-neutral-400 hover:text-red-400 hover:bg-neutral-800 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium cursor-pointer"
+          title="Salir de la sala"
+        >
+          <span className="hidden sm:inline">Salir</span>
+          <LogOut className="w-4 h-4" />
+        </button>
+      </div>
     </header>
   );
 }
