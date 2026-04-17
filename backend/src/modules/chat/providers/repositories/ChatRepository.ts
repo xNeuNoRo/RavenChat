@@ -1,6 +1,7 @@
 import {
   Cache,
   Injectable,
+  MapTo,
   requestContext,
   Retry,
   Timeout,
@@ -36,6 +37,7 @@ export class ChatRepository {
   @Timeout(30000) // timeout de 30 segundos para esta consulta para evitar que se quede colgada por muchas peticiones simultaneas
   @Retry(3, 500) // reintenta la consulta hasta 3 veces con un delay de 500ms entre cada intento en caso de error
   @Cache("chat:message")
+  @MapTo(ChatMessage)
   public async getById(id: string): Promise<ChatMessage | null> {
     return await this.session.load<ChatMessage>(id);
   }
@@ -48,6 +50,7 @@ export class ChatRepository {
   @Timeout(30000) // timeout de 30 segundos para esta consulta para evitar que se quede colgada por muchas peticiones simultaneas
   @Retry(3, 500) // reintenta la consulta hasta 3 veces con un delay de 500ms entre cada intento en caso de error
   @Cache("chat:recents")
+  @MapTo(ChatMessage)
   public async getRecent(limit: number = 50): Promise<ChatMessage[]> {
     const messages = await this.session
       .query<ChatMessage>({ collection: "ChatMessages" })

@@ -19,7 +19,10 @@ export async function buildApp() {
     // Configuración de Seguridad (CORS, Helmet y Rate Limit)
     // El framework ya tiene los plugins integrados internamente.
     security: {
-      enableCors: true,
+      enableCors: { 
+        origin: "*",
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      },
       enableHelmet: true,
       rateLimit: {
         max: 100,
