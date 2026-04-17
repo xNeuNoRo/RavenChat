@@ -142,7 +142,7 @@ export class SocketClient {
   }
 }
 
-// URL del WebSocket definida en las variables de entorno (VITE_WS_URL)
+// URL del WebSocket definida en las variables de entorno (VITE_CHAT_WS_URL)
 const WS_URL = import.meta.env.VITE_CHAT_WS_URL;
 // Exportamos una instancia singleton del SocketClient en el url definido para el chat
 export const chatSocket = new SocketClient(`${WS_URL}/chat`);
