@@ -109,11 +109,10 @@ export function useEditMessage(room: string) {
       );
     },
     onSuccess: (data) => {
-      // Feedback sutil de edición
-      toast.success("Mensaje editado");
-
       // Actualizamos la tarea en la caché para que la edición se vea inmediatamente
       if (data) {
+        // Feedback sutil de edición
+        toast.success("Mensaje editado");
         updateMessageInCache(queryClient, data, room);
       }
     },
