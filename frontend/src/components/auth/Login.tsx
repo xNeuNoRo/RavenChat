@@ -53,7 +53,7 @@ export function Login({ onJoin }: Readonly<LoginProps>) {
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="ej. enderchamo"
+            placeholder="ej. angel_dev"
             className="w-full bg-neutral-950 text-white border border-neutral-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
             autoComplete="off"
             required
