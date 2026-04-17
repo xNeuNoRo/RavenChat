@@ -7,9 +7,12 @@ import {
   OnConnect,
   OnDisconnect,
   requestContext,
+  Socket,
   SubscribeMessage,
+  UseParams,
   WebSocketGateway,
   WsBroadcaster,
+  WsPayload,
 } from "@neunoro/fastify-kit";
 import { ChatService } from "../../providers/services/ChatService";
 import { RavenDbService } from "@/infrastructure/database/RavenDbService";
@@ -34,6 +37,7 @@ export class ChatGateway {
   private readonly _broadcaster!: WsBroadcaster;
 
   @OnConnect()
+  @UseParams(Socket())
   public handleConnection(client: FastifyKitSocket) {
     this.logger.info(`[ChatGateway] Cliente conectado: ${client.id}`);
     // Unimos el cliente a una sala general para poder emitir eventos a todos los clientes conectados a esa sala
@@ -44,6 +48,7 @@ export class ChatGateway {
   }
 
   @OnDisconnect()
+  @UseParams(Socket())
   public handleDisconnect(client: FastifyKitSocket) {
     this.logger.info(`[ChatGateway] Cliente desconectado: ${client.id}`);
   }
@@ -101,6 +106,7 @@ export class ChatGateway {
    * @description Handler que se ejecuta al recibir el evento de nuevo mensaje
    */
   @SubscribeMessage(ChatInboundEvent.SEND_MESSAGE)
+  @UseParams(Socket(), WsPayload())
   public async onNewMessage(
     client: FastifyKitSocket,
     payload: ChatInboundPayloads[ChatInboundEvent.SEND_MESSAGE],
@@ -125,6 +131,7 @@ export class ChatGateway {
    * @description Handler que se ejecuta al recibir el evento de editar mensaje
    */
   @SubscribeMessage(ChatInboundEvent.UPDATE_MESSAGE)
+  @UseParams(Socket(), WsPayload())
   public async onEditMessage(
     client: FastifyKitSocket,
     payload: ChatInboundPayloads[ChatInboundEvent.UPDATE_MESSAGE],
@@ -151,6 +158,7 @@ export class ChatGateway {
    * @description Handler que se ejecuta al recibir el evento de eliminar mensaje
    */
   @SubscribeMessage(ChatInboundEvent.DELETE_MESSAGE)
+  @UseParams(Socket(), WsPayload())
   public async onDeleteMessage(
     client: FastifyKitSocket,
     payload: ChatInboundPayloads[ChatInboundEvent.DELETE_MESSAGE],
@@ -173,6 +181,7 @@ export class ChatGateway {
   }
 
   @SubscribeMessage(ChatInboundEvent.TYPING)
+  @UseParams(Socket(), WsPayload())
   public async onTyping(
     _client: FastifyKitSocket,
     payload: ChatInboundPayloads[ChatInboundEvent.TYPING],
