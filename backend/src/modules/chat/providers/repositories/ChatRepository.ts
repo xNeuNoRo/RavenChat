@@ -1,6 +1,7 @@
 import {
   Cache,
   Injectable,
+  InjectConfig,
   requestContext,
   Retry,
   Timeout,
@@ -12,6 +13,9 @@ import { RavenToEntity } from "@/infrastructure/database/RavenToEntity.decorator
 
 @Injectable()
 export class ChatRepository {
+  @InjectConfig("chat_message_expiration_days")
+  private readonly expirationDays!: number;
+
   /**
    * @description funcion de utilidad para obtener la sesion de ravendb de la request
    */
@@ -27,6 +31,13 @@ export class ChatRepository {
    */
   public async save(message: ChatMessage): Promise<void> {
     await this.session.store(message);
+    // obtenemos los metadatos del documento
+    const metadata = this.session.advanced.getMetadataFor(message);
+    // calculamos la fecha de expiracion del mensaje sumando la cantidad de dias de expiracion a la fecha actual
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + this.expirationDays);
+    // asignamos la fecha de expiracion al documento
+    metadata["@expires"] = expiresAt.toISOString();
   }
 
   /**

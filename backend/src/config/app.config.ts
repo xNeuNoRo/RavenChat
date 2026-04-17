@@ -12,4 +12,5 @@ export const loadAppConfigurations = (): void => {
   // ConfigRegistry.set("jwt_secret", process.env.JWT_SECRET);
   ConfigRegistry.set("database_url", process.env.DATABASE_URL);
   ConfigRegistry.set("database_name", process.env.DATABASE_NAME);
+  ConfigRegistry.set("chat_message_expiration_days", Number(process.env.CHAT_MESSAGE_EXPIRATION_DAYS) || 7);
 };
