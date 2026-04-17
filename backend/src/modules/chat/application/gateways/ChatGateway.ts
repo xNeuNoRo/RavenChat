@@ -6,6 +6,7 @@ import {
   LoggerContract,
   OnConnect,
   OnDisconnect,
+  OnEvent,
   requestContext,
   Socket,
   SubscribeMessage,
@@ -51,6 +52,41 @@ export class ChatGateway {
   @UseParams(Socket())
   public handleDisconnect(client: FastifyKitSocket) {
     this.logger.info(`[ChatGateway] Cliente desconectado: ${client.id}`);
+  }
+
+  // ========================================================
+  // Escuchamos a cualquier evento de mensaje creado, 
+  // actualizado o eliminado para emitirlo a los clientes conectados a la sala general
+  // ========================================================
+
+  @OnEvent(ChatOutboundEvent.MESSAGE_CREATED)
+  public handleCreatedEvent(message: ChatMessage) {
+    this._broadcaster.emitToRoom(
+      "/chat",
+      CHAT_ROOMS.GENERAL,
+      ChatOutboundEvent.MESSAGE_CREATED,
+      message,
+    );
+  }
+
+  @OnEvent(ChatOutboundEvent.MESSAGE_UPDATED)
+  public handleUpdatedEvent(message: ChatMessage) {
+    this._broadcaster.emitToRoom(
+      "/chat",
+      CHAT_ROOMS.GENERAL,
+      ChatOutboundEvent.MESSAGE_UPDATED,
+      message,
+    );
+  }
+
+  @OnEvent(ChatOutboundEvent.MESSAGE_DELETED)
+  public handleDeletedEvent(payload: { id: string }) {
+    this._broadcaster.emitToRoom(
+      "/chat",
+      CHAT_ROOMS.GENERAL,
+      ChatOutboundEvent.MESSAGE_DELETED,
+      payload,
+    );
   }
 
   /**

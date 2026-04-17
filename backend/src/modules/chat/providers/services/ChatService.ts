@@ -1,6 +1,9 @@
 import {
   ClearCache,
+  EVENT_BUS_TOKEN,
+  EventBusContract,
   ForbiddenException,
+  getEventBus,
   Inject,
   Injectable,
   NotFoundException,
@@ -12,11 +15,17 @@ import { CreateMessageDto } from "../../application/dtos/CreateMessage.dto";
 import { ChatMessage } from "../../domain/entities/ChatMessage.entity";
 import { UserActivityStats } from "../../domain/projections/UserActivityStats";
 import { UpdateMessageDto } from "../../application/dtos/UpdateMessage.dto";
+import { ChatOutboundEvent } from "../../domain/events/ChatEvents";
 
 @Injectable()
 export class ChatService {
   @Inject(ChatRepository)
   private readonly chatRepository!: ChatRepository;
+
+  // Obtenemos el event bus para emitir eventos al gateway desde el servicio
+  private get _eventBus(): EventBusContract {
+    return getEventBus();
+  }
 
   private get session(): IDocumentSession {
     return requestContext.get("dbSession");
@@ -35,6 +44,8 @@ export class ChatService {
     const message = ChatMessage.create(dto.username, dto.content);
     await this.chatRepository.save(message);
     await this.session.saveChanges();
+    // Le emitimos el evento al gateway para que lo reenvie a los clientes conectados
+    this._eventBus.emit(ChatOutboundEvent.MESSAGE_CREATED, message);
     return message;
   }
 
@@ -53,6 +64,8 @@ export class ChatService {
     message.updateContent(dto.content);
     await this.chatRepository.save(message);
     await this.session.saveChanges();
+    // Le emitimos el evento al gateway para que lo reenvie a los clientes conectados
+    this._eventBus.emit(ChatOutboundEvent.MESSAGE_UPDATED, message);
     return message;
   }
 
@@ -74,6 +87,8 @@ export class ChatService {
 
     await this.chatRepository.delete(id);
     await this.session.saveChanges();
+    // Le emitimos el evento al gateway para que lo reenvie a los clientes conectados
+    this._eventBus.emit(ChatOutboundEvent.MESSAGE_DELETED, { id });
   }
 
   public async getChatHistory(limit: number = 50): Promise<ChatMessage[]> {
