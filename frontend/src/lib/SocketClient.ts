@@ -14,12 +14,21 @@ export class SocketClient {
     ChatOutboundEvent,
     Array<(data: unknown) => void>
   >();
-  private readonly connectionListeners = new Set<(isConnected: boolean) => void>();
+  private readonly connectionListeners = new Set<
+    (isConnected: boolean) => void
+  >();
   private reconnectTimer: number | null = null;
   private readonly url: string;
 
   constructor(url: string) {
     this.url = url;
+  }
+
+  /**
+   * @description Indica si la conexión WebSocket está actualmente abierta y lista para enviar/recibir mensajes.
+   */
+  public get isConnected(): boolean {
+    return this.socket?.readyState === WebSocket.OPEN;
   }
 
   /**

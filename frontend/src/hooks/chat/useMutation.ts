@@ -11,6 +11,8 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useSocketEmitter } from "../shared/useSocketEmitter";
+import { ChatInboundEvent } from "@/shared/chat.events";
 
 /**
  * @description Función auxiliar para actualizar un mensaje en la caché de consultas después de crearlo o actualizarlo en el servidor.
@@ -61,11 +63,18 @@ const updateMessageInCache = (
  */
 export function useSendMessage(room: string) {
   const queryClient = useQueryClient();
+  const emit = useSocketEmitter();
 
   return useMutation({
-    mutationFn: (messageData: CreateMessageDto) => sendMessage(messageData),
+    mutationFn: (messageData: CreateMessageDto) => {
+      return emit(ChatInboundEvent.SEND_MESSAGE, messageData, () =>
+        sendMessage(messageData),
+      );
+    },
     onSuccess: (data) => {
-      updateMessageInCache(queryClient, data, room);
+      if (data) {
+        updateMessageInCache(queryClient, data, room);
+      }
     },
     onError: (error) => {
       // Mostramos el mensaje de error si el envío falla (ej. validaciones del servidor)
@@ -81,6 +90,7 @@ export function useSendMessage(room: string) {
  */
 export function useEditMessage(room: string) {
   const queryClient = useQueryClient();
+  const emit = useSocketEmitter();
 
   return useMutation({
     mutationFn: ({
@@ -91,13 +101,21 @@ export function useEditMessage(room: string) {
       id: string;
       updateData: UpdateMessageDto;
       username: string;
-    }) => editMessage(id, updateData, username),
+    }) => {
+      return emit(
+        ChatInboundEvent.UPDATE_MESSAGE,
+        { params: { id }, body: updateData, currentUsername: username },
+        () => editMessage(id, updateData, username),
+      );
+    },
     onSuccess: (data) => {
       // Feedback sutil de edición
       toast.success("Mensaje editado");
 
       // Actualizamos la tarea en la caché para que la edición se vea inmediatamente
-      updateMessageInCache(queryClient, data, room);
+      if (data) {
+        updateMessageInCache(queryClient, data, room);
+      }
     },
     onError: (error) => {
       toast.error(error.message || "Error al editar el mensaje");
@@ -112,10 +130,16 @@ export function useEditMessage(room: string) {
  */
 export function useDeleteMessage(room: string) {
   const queryClient = useQueryClient();
+  const emit = useSocketEmitter();
 
   return useMutation({
-    mutationFn: ({ id, username }: { id: string; username: string }) =>
-      deleteMessage(id, username),
+    mutationFn: ({ id, username }: { id: string; username: string }) => {
+      return emit(
+        ChatInboundEvent.DELETE_MESSAGE,
+        { params: { id }, currentUsername: username },
+        () => deleteMessage(id, username),
+      );
+    },
     onMutate: async ({ id }) => {
       // Cancelamos cualquier consulta en curso relacionada con el chat para evitar que sobreescriban nuestra caché optimista
       await queryClient.cancelQueries({ queryKey: queryKeys.chat.all });
