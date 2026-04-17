@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo } from "react";
 import { useChatMessages, useChatTyping } from "@/hooks/chat";
 import { useChatSocketDispatcher } from "@/hooks/shared/useChatSocketDispatcher";
+import { useChatScroll } from "@/hooks/shared/useChatScroll";
 import { MessageBubble } from "./MessageBubble";
 import { ChatInput } from "./ChatInput";
 import { motion, AnimatePresence } from "framer-motion";
@@ -27,13 +28,8 @@ export function ChatLayout({ room, username }: Readonly<ChatLayoutProps>) {
     [typingUsers],
   );
 
-  // Ref para el auto-scroll al final de los mensajes
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Auto-scroll simple cada vez que los mensajes cambian
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, typingUsersList]);
+  // Integramos el hook de scroll inteligente
+  const scrollRef = useChatScroll([messages, typingUsersList]);
 
   // Filtramos al propio usuario de la lista de "escribiendo"
   const othersTyping = typingUsersList.filter((u) => u !== username);
@@ -52,7 +48,7 @@ export function ChatLayout({ room, username }: Readonly<ChatLayoutProps>) {
       <ChatHeader room={room} username={username} />
 
       {/* Área de Mensajes */}
-      <div className="flex-1 overflow-y-auto p-6 scroll-smooth">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 scroll-smooth">
         <div className="max-w-3xl mx-auto flex flex-col justify-end min-h-full">
           <AnimatePresence mode="popLayout">
             {messages?.map((msg) => (
@@ -75,9 +71,6 @@ export function ChatLayout({ room, username }: Readonly<ChatLayoutProps>) {
               {othersTyping.length === 1 ? "está" : "están"} escribiendo...
             </motion.div>
           )}
-
-          {/* Ancla para el auto-scroll */}
-          <div ref={messagesEndRef} />
         </div>
       </div>
 
