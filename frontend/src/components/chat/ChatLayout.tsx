@@ -9,6 +9,8 @@ import { Loader2 } from "lucide-react";
 import ChatHeader from "./ChatHeader";
 import { ConnectionBanner } from "./ConnectionBanner";
 import { StatsSidebar } from "./StatsSidebar";
+import { UserAvatar } from "./UserAvatar";
+import { TypingIndicator } from "./TypingIndicator";
 
 interface ChatLayoutProps {
   room: string;
@@ -73,16 +75,38 @@ export function ChatLayout({ room, username }: Readonly<ChatLayoutProps>) {
           </AnimatePresence>
 
           {/* Indicador de escribiendo */}
-          {othersTyping.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-xs text-neutral-500 italic mb-4 ml-4"
-            >
-              {othersTyping.join(", ")}{" "}
-              {othersTyping.length === 1 ? "está" : "están"} escribiendo...
-            </motion.div>
-          )}
+          <AnimatePresence>
+            {othersTyping.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{
+                  opacity: 0,
+                  scale: 0.95,
+                  transition: { duration: 0.15 },
+                }}
+                transition={{ duration: 0.2 }}
+                className="flex items-end gap-2 mb-4 mt-2"
+              >
+                {/* Mostramos el avatar del primer usuario que esté escribiendo */}
+                <UserAvatar username={othersTyping[0]} />
+
+                <div className="flex flex-col gap-1">
+                  {/* Burbuja que contiene los 3 puntos animando */}
+                  <div className="px-3 py-2.5 bg-neutral-900 rounded-2xl rounded-bl-none border border-neutral-800/50 w-fit">
+                    <TypingIndicator />
+                  </div>
+
+                  {/* Texto descriptivo sutil */}
+                  <span className="text-[11px] text-neutral-500 font-medium px-1">
+                    {othersTyping.length === 1
+                      ? `${othersTyping[0]} está escribiendo...`
+                      : `${othersTyping.join(", ")} están escribiendo...`}
+                  </span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 

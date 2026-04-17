@@ -8,6 +8,7 @@ import type { ChatMessage } from "@/shared/chat.schemas";
 import { useEditMessage, useDeleteMessage } from "@/hooks/chat";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { UserAvatar } from "./UserAvatar";
 
 interface MessageBubbleProps {
   message: ChatMessage;
@@ -62,10 +63,12 @@ export function MessageBubble({
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.2 }}
       className={clsx(
-        "group relative flex w-full mb-4",
+        "group relative flex w-full mb-4 gap-2",
         isOwnMessage ? "justify-end" : "justify-start",
       )}
     >
+      {!isOwnMessage && <UserAvatar username={message.username} />}
+
       {/* Menú flotante de acciones (Solo visible en hover para los mensajes del usuario) */}
       {isOwnMessage && !isEditing && (
         <div className="absolute top-0 -translate-y-4 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-neutral-800 border border-neutral-700 rounded-md p-1 shadow-lg z-10">
