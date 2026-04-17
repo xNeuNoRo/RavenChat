@@ -19,7 +19,7 @@ export const UserActivityStatsSchema = Type.Object(
   {
     username: Type.String(),
     totalMessages: Type.Number(),
-    lastMessageAt: Type.String({ format: "date-time" }),
+    lastMessageAt: Type.String(),
   },
   { additionalProperties: true }, // Permitimos propiedades adicionales por los metadatos de ravenDB
 );
