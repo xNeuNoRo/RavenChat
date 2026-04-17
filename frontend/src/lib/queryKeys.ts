@@ -10,6 +10,7 @@ export const queryKeys = {
     messages: {
       all: ["chat", "messages"] as const,
       list: (room: string) => ["chat", "messages", "list", { room }] as const,
+      detail: (id: string) => ["chat", "messages", "detail", { id }] as const,
     },
 
     // Llaves para las estadísticas de usuario
