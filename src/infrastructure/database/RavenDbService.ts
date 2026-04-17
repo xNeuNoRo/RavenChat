@@ -4,7 +4,13 @@ import {
   LOGGER_TOKEN,
   LoggerContract,
 } from "@neunoro/fastify-kit";
-import DocumentStore, { IDocumentStore } from "ravendb";
+
+import DocumentStore, {
+  IDocumentStore,
+  GetDatabaseNamesOperation,
+  CreateDatabaseOperation,
+} from "ravendb";
+import { MessagesByUserStats } from "../../modules/chat/infrastructure/indexes/MessagesByUserStats";
 
 export class RavenDbService {
   private static _store: IDocumentStore;
@@ -13,10 +19,58 @@ export class RavenDbService {
   private readonly logger!: LoggerContract;
 
   @InjectConfig("DATABASE_URL")
-  private readonly dbUrl!: string;
+  private readonly dbUrl: string = "http://localhost:8080";
 
   @InjectConfig("DATABASE_NAME")
-  private readonly dbName!: string;
+  private readonly dbName: string = "RavenChat";
+
+  private async ensureDatabaseExists(
+    store: IDocumentStore,
+    databaseName: string,
+  ) {
+    try {
+      // Verificamos si la base de datos existe enviando una operación de mantenimiento al servidor
+
+      // Obtenemos la lista de bases de datos disponibles en el servidor
+      const dbNames = await store.maintenance.server.send(
+        new GetDatabaseNamesOperation(0, 100),
+      );
+
+      // Verificamos si la base de datos que queremos usar ya existe
+      // (simplmente verificando que se encuentre en el array)
+      const exists = dbNames.includes(databaseName);
+
+      this.logger.info(
+        "[RavenDB] Verificando existencia de la base de datos:",
+        {
+          database: databaseName,
+
+          exists,
+          dbNames,
+        },
+      );
+
+      if (!exists) {
+        this.logger.info(
+          `[RavenDB] La base de datos '${databaseName}' no existe. Creándola...`,
+        );
+
+        // Enviamos la operación para crear la base de datos al servidor
+
+        await store.maintenance.server.send(
+          new CreateDatabaseOperation({ databaseName }),
+        );
+
+        this.logger.info(
+          `[RavenDB] Base de datos '${databaseName}' creada con éxito.`,
+        );
+      }
+    } catch (error: any) {
+      this.logger.error("[RavenDB] Error verificando la base de datos:", error);
+
+      throw error;
+    }
+  }
 
   public static get store(): IDocumentStore {
     if (!RavenDbService._store) {
@@ -39,6 +93,10 @@ export class RavenDbService {
       entity["@collection"];
 
     store.initialize();
+
+    await this.ensureDatabaseExists(store, this.dbName);
+    await new MessagesByUserStats().execute(store);
+
     RavenDbService._store = store;
 
     this.logger.info(
