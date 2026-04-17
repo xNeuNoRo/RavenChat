@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { chatSocket } from "../../api/SocketClient";
+import { chatSocket } from "../../lib/SocketClient";
 import {
   ChatOutboundEvent,
   type ChatOutboundPayloads,
