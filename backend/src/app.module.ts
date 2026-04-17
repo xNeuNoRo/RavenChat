@@ -1,6 +1,6 @@
 import path from "node:path";
-import { Module, TRANSACTION_MANAGER_TOKEN } from "@neunoro/fastify-kit";
-import { DatabaseService } from "./infrastructure/database/DatabaseService";
+import { Module } from "@neunoro/fastify-kit";
+import { RavenDbService } from "./infrastructure/database/RavenDbService";
 
 @Module({
   // Autodescubrimiento de módulos. La Factory escaneará recursivamente el directorio base
@@ -13,7 +13,7 @@ import { DatabaseService } from "./infrastructure/database/DatabaseService";
   // imports: [BookModule, AnotherModule], --- IGNORE ---
   providers: [
     // Servicios globales de infraestructura
-    DatabaseService,
+    RavenDbService,
   ],
 })
 export class AppModule {}

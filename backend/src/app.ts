@@ -1,12 +1,14 @@
-import fs from "node:fs";
+// import fs from "node:fs";
 import { FastifyKit } from "@neunoro/fastify-kit";
 import { AppModule } from "./app.module";
+import { envSchema } from "./config/env.schema";
 
 export async function buildApp() {
   // Creamos la aplicación usando la Factory del framework
   const app = await FastifyKit.create({
     // Módulo raíz de la aplicación
     module: AppModule,
+    envSchema: envSchema,
 
     // Habilitamos soporte para WebSockets
     websockets: true,
@@ -17,7 +19,10 @@ export async function buildApp() {
     // Configuración de Seguridad (CORS, Helmet y Rate Limit)
     // El framework ya tiene los plugins integrados internamente.
     security: {
-      enableCors: true,
+      enableCors: { 
+        origin: "*",
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      },
       enableHelmet: true,
       rateLimit: {
         max: 100,
@@ -28,18 +33,19 @@ export async function buildApp() {
     // Configuración de Documentación (Swagger + Scalar)
     // Generará automáticamente la ruta /docs
     swagger: {
-      title: "Books API",
-      description: "API de alto rendimiento construida con Neucore Framework",
+      title: "Chat API",
+      description:
+        "API de alto rendimiento construida con FastifyKit (desarrollado por Angel)",
       version: "1.0.0",
     },
 
     // Opciones de bajo nivel para la instancia de Fastify (SSL, HTTP2, etc.)
     fastifyOptions: {
       // http2: true,
-      https: {
-        key: fs.readFileSync("./localhost+2-key.pem"),
-        cert: fs.readFileSync("./localhost+2.pem"),
-      },
+      // https: {
+      //   key: fs.readFileSync("./localhost+2-key.pem"),
+      //   cert: fs.readFileSync("./localhost+2.pem"),
+      // },
       logger: false, // El framework usa su propio sistema de logs
     },
   });

@@ -8,10 +8,11 @@ import {
 } from "@neunoro/fastify-kit";
 
 import { PinoLogger } from "./infrastructure/logger/PinoLogger";
-import { DatabaseService } from "./infrastructure/database/DatabaseService";
+import { RavenDbService } from "./infrastructure/database/RavenDbService";
 import { buildApp } from "./app";
 import { loadAppConfigurations } from "./config/app.config";
 import { FastifyInstance } from "fastify";
+import { ravenSessionPlugin } from "./infrastructure/database/ravenSessionPlugin";
 
 @Injectable()
 class ApplicationServer {
@@ -24,16 +25,19 @@ class ApplicationServer {
   @Inject(LOGGER_TOKEN)
   private readonly logger!: LoggerContract;
 
-  @Inject(DatabaseService)
-  private readonly dbService!: DatabaseService;
+  @Inject(RavenDbService)
+  private readonly dbService!: RavenDbService;
 
   public async start(): Promise<void> {
     try {
       // Conectamos la base de datos
-      await this.dbService.connect();
+      await this.dbService.initialize();
 
       // Construimos la app Fastify
       const app = await buildApp();
+
+      // Registramos el plugin para manejar sesiones de RavenDB en cada solicitud
+      await app.register(ravenSessionPlugin);
 
       // Usamos las variables inyectadas
       await app.listen({ port: this.port, host: this.host });
@@ -68,7 +72,7 @@ class ApplicationServer {
         await app.close();
         this.logger.debug("✅ Servidor HTTP cerrado.");
 
-        await this.dbService.disconnect();
+        await this.dbService.close();
         this.logger.debug("✅ Base de datos desconectada.");
 
         this.logger.info("💤 Shutdown completado. Saliendo...");
