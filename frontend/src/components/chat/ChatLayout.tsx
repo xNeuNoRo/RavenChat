@@ -42,14 +42,14 @@ export function ChatLayout({ room, username }: Readonly<ChatLayoutProps>) {
 
   if (isLoading) {
     return (
-      <div className="h-full flex items-center justify-center bg-neutral-950 text-indigo-500">
+      <div className="h-dvh flex items-center justify-center bg-neutral-950 text-indigo-500">
         <Loader2 className="w-8 h-8 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full bg-neutral-950 overflow-hidden">
+    <div className="flex flex-col h-dvh bg-neutral-950 overflow-hidden">
       {/* Header */}
       <ChatHeader
         room={room}
@@ -61,7 +61,7 @@ export function ChatLayout({ room, username }: Readonly<ChatLayoutProps>) {
       <ConnectionBanner />
 
       {/* Área de Mensajes */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 scroll-smooth">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto overscroll-y-contain p-6 scroll-smooth">
         <div className="max-w-3xl mx-auto flex flex-col justify-end min-h-full">
           <AnimatePresence mode="popLayout">
             {messages?.map((msg) => (
