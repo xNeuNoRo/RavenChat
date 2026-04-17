@@ -7,9 +7,9 @@ export class ChatMessage {
   public readonly createdAt: string;
 
   // Constructor privado para usar el patron factory method
-  private constructor(content: string, username?: string) {
+  private constructor(content?: string, username?: string) {
     this.username = username?.trim() || "Usuario Anónimo";
-    this.content = content.trim();
+    this.content = content?.trim() ?? "";
     this.createdAt = new Date().toISOString();
   }
 

@@ -50,7 +50,7 @@ export class ChatRepository {
   @Cache("chat:recents")
   public async getRecent(limit: number = 50): Promise<ChatMessage[]> {
     const messages = await this.session
-      .query<ChatMessage>("ChatMessages")
+      .query<ChatMessage>({ collection: "ChatMessages" })
       .orderByDescending("createdAt")
       .take(limit)
       .all();
