@@ -6,6 +6,8 @@ import { es } from "date-fns/locale";
 import { Pencil, Trash2, X, Check } from "lucide-react";
 import type { ChatMessage } from "@/shared/chat.schemas";
 import { useEditMessage, useDeleteMessage } from "@/hooks/chat";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface MessageBubbleProps {
   message: ChatMessage;
@@ -90,7 +92,7 @@ export function MessageBubble({
 
       <div
         className={clsx(
-          "max-w-[75%] px-4 py-3 rounded-2xl shadow-sm flex flex-col gap-1 transition-all",
+          "max-w-[75%] px-4 py-3 rounded-2xl shadow-sm flex flex-col gap-1 transition-all overflow-hidden",
           isOwnMessage
             ? "bg-indigo-600 text-white rounded-br-sm"
             : "bg-neutral-800 text-neutral-100 rounded-bl-sm border border-neutral-700/50",
@@ -123,7 +125,7 @@ export function MessageBubble({
               <button
                 onClick={() => {
                   setIsEditing(false);
-                  setEditContent(message.content); // Rollback visual
+                  setEditContent(message.content);
                 }}
                 className="p-1 hover:bg-white/10 rounded transition-colors cursor-pointer"
               >
@@ -139,9 +141,11 @@ export function MessageBubble({
             </div>
           </motion.div>
         ) : (
-          <p className="text-sm leading-relaxed whitespace-pre-wrap wrap-break-word">
-            {message.content}
-          </p>
+          <div className="text-sm leading-relaxed whitespace-pre-wrap wrap-break-word prose prose-sm prose-invert max-w-none [&>p]:my-0 [&>p:not(:last-child)]:mb-2 [&_pre]:my-2 [&_pre]:bg-black/30 [&_code]:bg-black/20 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_a]:text-indigo-300 [&_a]:underline-offset-2">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {message.content}
+            </ReactMarkdown>
+          </div>
         )}
 
         <span className="text-[10px] text-white/50 self-end mt-1 uppercase tracking-wider">
