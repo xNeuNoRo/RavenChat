@@ -24,6 +24,9 @@ export const chatEventStrategies = {
       if (oldData.some((msg) => msg.id === data.id)) return oldData;
       return [...oldData, data];
     });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.chat.stats.all,
+    });
   },
 
   [ChatOutboundEvent.MESSAGE_UPDATED]: (
@@ -56,6 +59,9 @@ export const chatEventStrategies = {
     queryClient.setQueryData(listKey, (oldData: ChatMessage[] | undefined) => {
       if (!oldData) return undefined;
       return oldData.filter((msg) => msg.id !== data.id);
+    });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.chat.stats.all,
     });
   },
 
