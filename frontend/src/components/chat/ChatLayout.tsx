@@ -56,6 +56,7 @@ export function ChatLayout({ room, username }: Readonly<ChatLayoutProps>) {
                 key={msg.id} // En un Optimistic Update temporal, el ID debe existir
                 message={msg}
                 isOwnMessage={msg.username === username}
+                room={room}
               />
             ))}
           </AnimatePresence>
