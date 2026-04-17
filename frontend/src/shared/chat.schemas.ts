@@ -8,8 +8,24 @@ export const ChatMessageSchema = Type.Object({
   username: Type.String(),
   createdAt: Type.String(), // ISO String
 });
+export const ChatMessagesSchema = Type.Array(ChatMessageSchema);
 
 export type ChatMessage = Static<typeof ChatMessageSchema>;
+export type ChatMessages = Static<typeof ChatMessagesSchema>;
+
+// --- Esquemas de Estadísticas de Usuario ---
+
+export const UserActivityStatsSchema = Type.Object({
+  username: Type.String(),
+  totalMessages: Type.Number(),
+  lastMessageAt: Type.String({ format: "date-time" }),
+});
+export const UserActivityStatsArraySchema = Type.Array(UserActivityStatsSchema);
+
+export type UserActivityStats = Static<typeof UserActivityStatsSchema>;
+export type UserActivityStatsArray = Static<
+  typeof UserActivityStatsArraySchema
+>;
 
 // --- DTOs de Operaciones ---
 
