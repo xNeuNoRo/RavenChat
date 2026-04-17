@@ -20,6 +20,7 @@ import {
   WsResponse,
 } from "../../domain/events/ChatEvents";
 import { ChatMessage } from "../../domain/entities/ChatMessage.entity";
+import { CHAT_ROOMS } from "../../domain/constants/ChatRooms";
 
 @WebSocketGateway({ path: "/chat" })
 export class ChatGateway {
@@ -36,9 +37,9 @@ export class ChatGateway {
   public handleConnection(client: FastifyKitSocket) {
     this.logger.info(`[ChatGateway] Cliente conectado: ${client.id}`);
     // Unimos el cliente a una sala general para poder emitir eventos a todos los clientes conectados a esa sala
-    client.join("general");
+    client.join(CHAT_ROOMS.GENERAL);
     this.logger.info(
-      `[ChatGateway] Cliente ${client.id} se unió a la sala: general`,
+      `[ChatGateway] Cliente ${client.id} se unió a la sala: ${CHAT_ROOMS.GENERAL}`,
     );
   }
 
@@ -111,7 +112,7 @@ export class ChatGateway {
 
       this._broadcaster.emitToRoom(
         "/chat",
-        "general",
+        CHAT_ROOMS.GENERAL,
         ChatOutboundEvent.MESSAGE_CREATED,
         savedMessage,
       );
@@ -137,7 +138,7 @@ export class ChatGateway {
 
       this._broadcaster.emitToRoom(
         "/chat",
-        "general",
+        CHAT_ROOMS.GENERAL,
         ChatOutboundEvent.MESSAGE_UPDATED,
         updatedMessage,
       );
@@ -162,7 +163,7 @@ export class ChatGateway {
 
       this._broadcaster.emitToRoom(
         "/chat",
-        "general",
+        CHAT_ROOMS.GENERAL,
         ChatOutboundEvent.MESSAGE_DELETED,
         { id: payload.params.id },
       );
@@ -178,7 +179,7 @@ export class ChatGateway {
   ): Promise<WsResponse> {
     this._broadcaster.emitToRoom(
       "/chat",
-      "general",
+      CHAT_ROOMS.GENERAL,
       ChatOutboundEvent.USER_TYPING_BROADCAST,
       {
         username: payload.username,
