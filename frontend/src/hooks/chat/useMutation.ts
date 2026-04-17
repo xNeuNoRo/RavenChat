@@ -163,10 +163,13 @@ export function useDeleteMessage(room: string) {
     onSuccess: () => {
       toast.success("Mensaje eliminado");
     },
-    onSettled: () => {
-      // onSettled se ejecuta sin importar el resultado.
+    onSettled: (data, error) => {
+      // Si es WS (ambos seran undefined, y por ende no es necesario invalidar)
+      if (data || error) {
+        // onSettled se ejecuta sin importar el resultado.
       // Invalidamos para que la caché se reconcilie con la base de datos (RavenDB).
       queryClient.invalidateQueries({ queryKey: queryKeys.chat.all });
+      }
     },
     onError: (error, _variables, context) => {
       toast.error(error.message || "No se pudo eliminar el mensaje");
