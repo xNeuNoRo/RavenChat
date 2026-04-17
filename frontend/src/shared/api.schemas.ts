@@ -21,17 +21,20 @@ export type ApiResponseStrictFromSchema<T extends TSchema> =
 export const ApiResponseStrictSchema = <T extends TSchema>(dataSchema: T) =>
   Type.Union([
     // Caso de éxito: ok es true, data es del tipo esperado, error es null
-    Type.Object({
-      ok: Type.Literal(true),
-      data: dataSchema,
-      error: Type.Null(),
-      timestamp: Type.String({ format: "date-time" }),
-    }),
+    Type.Object(
+      {
+        ok: Type.Literal(true),
+        data: dataSchema,
+        error: Type.Null(),
+        timestamp: Type.String(),
+      },
+      { additionalProperties: true },
+    ),
     // Caso de error: ok es false, data es null, error es del tipo ApiError
     Type.Object({
       ok: Type.Literal(false),
       data: Type.Null(),
       error: ApiErrorSchema,
-      timestamp: Type.String({ format: "date-time" }),
-    }),
+      timestamp: Type.String(),
+    }, { additionalProperties: true }),
   ]);
