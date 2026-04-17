@@ -4,6 +4,10 @@ import { AppModule } from "./app.module";
 import { envSchema } from "./config/env.schema";
 
 export async function buildApp() {
+  const allowedOrigins = (
+    process.env.FRONTEND_URL || "http://localhost:5173"
+  ).split(",");
+  
   // Creamos la aplicación usando la Factory del framework
   const app = await FastifyKit.create({
     // Módulo raíz de la aplicación
@@ -19,8 +23,8 @@ export async function buildApp() {
     // Configuración de Seguridad (CORS, Helmet y Rate Limit)
     // El framework ya tiene los plugins integrados internamente.
     security: {
-      enableCors: { 
-        origin: "*",
+      enableCors: {
+        origin: allowedOrigins,
         methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
       },
       enableHelmet: true,
