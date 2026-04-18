@@ -1,14 +1,13 @@
 import { useState } from "react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { formatDistanceToNow } from "date-fns";
-import { es } from "date-fns/locale";
 import { Pencil, Trash2, X, Check } from "lucide-react";
 import type { ChatMessage } from "@/shared/chat.schemas";
 import { useEditMessage, useDeleteMessage } from "@/hooks/chat";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { UserAvatar } from "./UserAvatar";
+import { RelativeTime } from "./RelativeTime";
 
 interface MessageBubbleProps {
   message: ChatMessage;
@@ -152,10 +151,7 @@ export function MessageBubble({
         )}
 
         <span className="text-[10px] text-white/50 self-end mt-1 uppercase tracking-wider">
-          {formatDistanceToNow(new Date(message.createdAt), {
-            addSuffix: true,
-            locale: es,
-          })}
+          <RelativeTime date={message.createdAt} />
         </span>
       </div>
     </motion.div>
