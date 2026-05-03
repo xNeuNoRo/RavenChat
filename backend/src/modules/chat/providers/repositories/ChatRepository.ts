@@ -11,6 +11,9 @@ import { ChatMessage } from "../../domain/entities/ChatMessage.entity";
 import { UserActivityStats } from "../../domain/projections/UserActivityStats";
 import { RavenToEntity } from "@/infrastructure/database/RavenToEntity.decorator";
 
+// 12 horas en milisegundos
+const CACHE_TTL = 1000 * 60 * 60 * 12;
+
 @Injectable()
 export class ChatRepository {
   @InjectConfig("chat_message_expiration_days")
@@ -47,7 +50,7 @@ export class ChatRepository {
    */
   @Timeout(30000) // timeout de 30 segundos para esta consulta para evitar que se quede colgada por muchas peticiones simultaneas
   @Retry(3, 500) // reintenta la consulta hasta 3 veces con un delay de 500ms entre cada intento en caso de error
-  @Cache("chat:message")
+  @Cache("chat:message", CACHE_TTL)
   @RavenToEntity(ChatMessage)
   public async getById(id: string): Promise<ChatMessage | null> {
     return await this.session.load(id);
@@ -60,7 +63,7 @@ export class ChatRepository {
    */
   @Timeout(30000) // timeout de 30 segundos para esta consulta para evitar que se quede colgada por muchas peticiones simultaneas
   @Retry(3, 500) // reintenta la consulta hasta 3 veces con un delay de 500ms entre cada intento en caso de error
-  @Cache("chat:recents")
+  @Cache("chat:recents", CACHE_TTL)
   @RavenToEntity(ChatMessage)
   public async getRecent(limit: number = 50): Promise<ChatMessage[]> {
     const messages = await this.session

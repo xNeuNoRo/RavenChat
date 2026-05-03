@@ -22,7 +22,6 @@
     "test:coverage": "bun run pretest && jest --detectOpenHandles --coverage && bun run posttest",
     "pretest": "echo Iniciando pruebas",
     "posttest": "echo Pruebas finalizadas.",
-    "prepare": "if [ \"$NODE_ENV\" = \"development\" ]; then husky install; fi",
     "jest:init": "bunx ts-jest config:init"
   },
   "keywords": [],
@@ -66,10 +65,8 @@
     "typescript": "^6.0.2"
   },
   "dependencies": {
-    "@neunoro/fastify-kit": "^0.6.7",
+    "@neunoro/fastify-kit": "^0.7.2",
     "@sinclair/typebox": "^0.34.49",
-    "ajv": "^8.18.0",
-    "ajv-formats": "^3.0.1",
     "colors": "^1.4.0",
     "dotenv": "^17.2.1",
     "fastify": "^5.8.5",
